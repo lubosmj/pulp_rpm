@@ -122,11 +122,13 @@ if [[ "$TEST" == "performance" ]]; then
   exit
 fi
 
-if [ -f $FUNC_TEST_SCRIPT ]; then
-    $FUNC_TEST_SCRIPT
-else
-    pytest -v -r sx --color=yes --pyargs pulp_rpm.tests.functional || show_logs_and_return_non_zero
-fi
+pytest -vv -r sx --color=yes --pyargs --capture=no --durations=0 pulp_rpm.tests.performance || show_logs_and_return_non_zero
+
+#if [ -f $FUNC_TEST_SCRIPT ]; then
+#    $FUNC_TEST_SCRIPT
+#else
+#    pytest -v -r sx --color=yes --pyargs pulp_rpm.tests.functional || show_logs_and_return_non_zero
+#fi
 
 if [ -f $POST_SCRIPT ]; then
     $POST_SCRIPT

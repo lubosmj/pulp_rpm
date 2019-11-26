@@ -9,27 +9,55 @@ from pulp_smash.pulp3.utils import (
     delete_orphans,
     gen_repo,
     get_added_content_summary,
-    get_content,
     get_content_summary,
 )
+# get_content,
 
 from pulp_rpm.tests.functional.constants import (
-    RPM_KICKSTART_CONTENT_NAME,
     RPM_PACKAGE_CONTENT_NAME,
     RPM_KICKSTART_FIXTURE_URL,
     RPM_PUBLICATION_PATH,
     RPM_REMOTE_PATH,
     RPM_REPO_PATH,
-    CENTOS6_URL,
-    CENTOS7_URL,
-    CENTOS8_APPSTREAM_URL,
-    CENTOS8_BASEOS_URL,
-    CENTOS8_KICKSTART_APP_URL,
-    CENTOS8_KICKSTART_BASEOS_URL,
-    EPEL7_URL,
 )
 from pulp_rpm.tests.functional.utils import gen_rpm_remote
 from pulp_rpm.tests.functional.utils import set_up_module as setUpModule  # noqa:F401
+
+RHEL7_URL = "http://cdn.stage.redhat.com/content/dist/rhel/server/7/7Server/x86_64/os/"
+
+# RPM_KICKSTART_CONTENT_NAME,
+# CENTOS6_URL,
+# CENTOS7_URL,
+# CENTOS8_APPSTREAM_URL,
+# CENTOS8_BASEOS_URL,
+# CENTOS8_KICKSTART_APP_URL,
+# CENTOS8_KICKSTART_BASEOS_URL,
+# EPEL7_URL,
+'''
+    def test_centos6(self):
+        """Publish CentOS 6."""
+        self.rpm_publish(url=CENTOS6_URL)
+
+    def test_centos7(self):
+        """Publish CentOS 7."""
+        self.rpm_publish(url=CENTOS7_URL)
+
+    def test_centos8_baseos(self):
+        """Publish CentOS 8 BaseOS."""
+        self.rpm_publish(url=CENTOS8_BASEOS_URL)
+
+    def test_centos8_appstream(self):
+        """Publish CentOS 8 AppStream."""
+        self.rpm_publish(url=CENTOS8_APPSTREAM_URL)
+
+    def test_centos8_kickstart_baseos(self):
+        """Kickstart Publish CentOS 8 BaseOS."""
+        self.rpm_publish(url=CENTOS8_KICKSTART_BASEOS_URL)
+
+    def test_centos8_kickstart_appstream(self):
+        """Kickstart Publish CentOS 8 AppStream."""
+        self.rpm_publish(url=CENTOS8_KICKSTART_APP_URL)
+'''
 
 
 class PublishTestCase(unittest.TestCase):
@@ -73,12 +101,12 @@ class PublishTestCase(unittest.TestCase):
         """
         delete_orphans(self.cfg)
         repo = self.client.post(RPM_REPO_PATH, gen_repo())
-        self.addCleanup(self.client.delete, repo['pulp_href'])
+        # self.addCleanup(self.client.delete, repo['pulp_href'])
 
         # Create a remote with the standard test fixture url.
         body = gen_rpm_remote(url=url, policy=policy)
         remote = self.client.post(RPM_REMOTE_PATH, body)
-        self.addCleanup(self.client.delete, remote['pulp_href'])
+        # self.addCleanup(self.client.delete, remote['pulp_href'])
 
         # Sync the repository.
         self.assertIsNone(repo['latest_version_href'])
@@ -98,8 +126,9 @@ class PublishTestCase(unittest.TestCase):
         ))
 
         repo = self.client.get(repo['pulp_href'])
-        for kickstart_content in get_content(repo)[RPM_KICKSTART_CONTENT_NAME]:
-            self.addCleanup(self.client.delete, kickstart_content['pulp_href'])
+        # for kickstart_content in get_content(repo)[RPM_KICKSTART_CONTENT_NAME]:
+        #    pass
+        # self.addCleanup(self.client.delete, kickstart_content['pulp_href'])
 
         # Check that we have the correct content counts.
         self.assertIsNotNone(repo['latest_version_href'])
@@ -131,28 +160,4 @@ class PublishTestCase(unittest.TestCase):
 
     def test_epel7(self):
         """Publish EPEL 7."""
-        self.rpm_publish(url=EPEL7_URL)
-
-    def test_centos6(self):
-        """Publish CentOS 6."""
-        self.rpm_publish(url=CENTOS6_URL)
-
-    def test_centos7(self):
-        """Publish CentOS 7."""
-        self.rpm_publish(url=CENTOS7_URL)
-
-    def test_centos8_baseos(self):
-        """Publish CentOS 8 BaseOS."""
-        self.rpm_publish(url=CENTOS8_BASEOS_URL)
-
-    def test_centos8_appstream(self):
-        """Publish CentOS 8 AppStream."""
-        self.rpm_publish(url=CENTOS8_APPSTREAM_URL)
-
-    def test_centos8_kickstart_baseos(self):
-        """Kickstart Publish CentOS 8 BaseOS."""
-        self.rpm_publish(url=CENTOS8_KICKSTART_BASEOS_URL)
-
-    def test_centos8_kickstart_appstream(self):
-        """Kickstart Publish CentOS 8 AppStream."""
-        self.rpm_publish(url=CENTOS8_KICKSTART_APP_URL)
+        self.rpm_publish(url=RHEL7_URL)

@@ -6,6 +6,7 @@ requirements = [
     'createrepo_c~=0.13',
     'productmd',
     'pulpcore>=3.0.0rc8,<3.2',
+    'guppy3'
 ]
 
 with open('README.rst') as f:

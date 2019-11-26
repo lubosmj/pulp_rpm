@@ -1,5 +1,7 @@
 # coding=utf-8
 """Tests that sync rpm plugin repositories."""
+
+'''
 import unittest
 from datetime import datetime
 from urllib.parse import urljoin
@@ -27,6 +29,7 @@ from pulp_rpm.tests.functional.constants import (
 )
 from pulp_rpm.tests.functional.utils import gen_rpm_remote
 from pulp_rpm.tests.functional.utils import set_up_module as setUpModule  # noqa:F401
+
 
 
 class SyncTestCase(unittest.TestCase):
@@ -148,3 +151,4 @@ class SyncTestCase(unittest.TestCase):
     def test_centos8_kickstart_appstream_on_demand(self):
         """Kickstart Sync CentOS 8 AppStream."""
         self.rpm_sync(url=CENTOS8_KICKSTART_APP_URL)
+'''

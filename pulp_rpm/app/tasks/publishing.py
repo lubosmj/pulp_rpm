@@ -2,6 +2,8 @@ import os
 from gettext import gettext as _
 import logging
 import shutil
+# import cProfile
+from guppy import hpy
 
 import createrepo_c as cr
 import libcomps
@@ -34,6 +36,7 @@ from pulp_rpm.app.kickstart.treeinfo import create_treeinfo
 log = logging.getLogger(__name__)
 
 REPODATA_PATH = 'repodata'
+h = hpy()
 
 
 class PublicationData:
@@ -189,6 +192,7 @@ def publish(repository_version_pk):
         version=repository_version.number,
     ))
 
+    # def krokodil():
     with WorkingDirectory():
         with RpmPublication.create(repository_version) as publication:
             publication_data = PublicationData(publication)
@@ -197,13 +201,21 @@ def publish(repository_version_pk):
             packages = publication_data.packages
 
             # Main repo
+            log.info('HEAPING MAIN REPO...')
             create_repomd_xml(packages, publication, publication_data.repomdrecords)
+            log.info(str(h.heap()))
 
             for sub_repo in publication_data.sub_repos:
                 name = sub_repo[0]
                 packages = getattr(publication_data, f"{name}_packages")
                 extra_repomdrecords = getattr(publication_data, f"{name}_repomdrecords")
+
+                log.info('HEAPING LOOP...')
                 create_repomd_xml(packages, publication, extra_repomdrecords, name)
+                log.info(str(h.heap()))
+
+    # cProfile.runctx('krokodil()', globals(), locals(),
+    # filename='/home/vagrant/devel/backup/cprofile_test.prof')
 
 
 def create_repomd_xml(packages, publication, extra_repomdrecords, sub_folder=None):
