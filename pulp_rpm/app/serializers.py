@@ -7,6 +7,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotAcceptable
 
 from pulpcore.plugin.models import (
+    AsciiArmoredDetachedSigningService,
     Remote,
     RepositoryVersion,
 )
@@ -301,8 +302,17 @@ class RpmRepositorySerializer(RepositorySerializer):
     Serializer for Rpm Repositories.
     """
 
+    metadata_signing_service = RelatedField(
+        help_text="A reference to an associated signing service.",
+        view_name='signing-services-detail',
+        queryset=AsciiArmoredDetachedSigningService.objects.all(),
+        many=False,
+        required=False,
+        allow_null=True
+    )
+
     class Meta:
-        fields = RepositorySerializer.Meta.fields
+        fields = RepositorySerializer.Meta.fields + ('metadata_signing_service',)
         model = RpmRepository
 
 

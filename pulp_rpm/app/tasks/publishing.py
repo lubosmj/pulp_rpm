@@ -9,6 +9,7 @@ import libcomps
 from django.core.files import File
 
 from pulpcore.plugin.models import (
+    AsciiArmoredDetachedSigningService,
     ContentArtifact,
     RepositoryVersion,
     PublishedArtifact,
@@ -339,6 +340,9 @@ def create_repomd_xml(content, publication, extra_repomdrecords, sub_folder=None
 
     with open(repomd_path, "w") as repomd_f:
         repomd_f.write(repomd.xml_dump())
+
+    signing_service = AsciiArmoredDetachedSigningService.objects.get(name='sign-metadata')
+    signature = signing_service.sign(repomd_path)
 
     PublishedMetadata.create_from_file(
         relative_path=os.path.join(repodata_path, os.path.basename(repomd_path)),
