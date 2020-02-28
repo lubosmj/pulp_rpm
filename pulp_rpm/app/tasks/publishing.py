@@ -7,6 +7,7 @@ import createrepo_c as cr
 import libcomps
 
 from django.core.files import File
+from django.conf import settings
 
 from pulpcore.plugin.models import (
     AsciiArmoredDetachedSigningService,
@@ -341,11 +342,23 @@ def create_repomd_xml(content, publication, extra_repomdrecords, sub_folder=None
     with open(repomd_path, "w") as repomd_f:
         repomd_f.write(repomd.xml_dump())
 
-    signing_service = AsciiArmoredDetachedSigningService.objects.get(name='sign-metadata')
-    signature = signing_service.sign(repomd_path)
+    if settings.REPO_GPGCHECK:
+        signing_service = AsciiArmoredDetachedSigningService.objects.get(name='sign-metadata')
+        sign_results = signing_service.sign(repomd_path)
 
-    PublishedMetadata.create_from_file(
-        relative_path=os.path.join(repodata_path, os.path.basename(repomd_path)),
-        publication=publication,
-        file=File(open(repomd_path, 'rb'))
-    )
+        PublishedMetadata.create_from_file(
+            relative_path=os.path.join(repodata_path, os.path.basename(sign_results['file'])),
+            publication=publication,
+            file=File(open(sign_results['file'], 'rb'))
+        )
+        PublishedMetadata.create_from_file(
+            relative_path=os.path.join(repodata_path, os.path.basename(sign_results['signature'])),
+            publication=publication,
+            file=File(open(sign_results['signature'], 'rb'))
+        )
+    else:
+        PublishedMetadata.create_from_file(
+            relative_path=os.path.join(repodata_path, os.path.basename(repomd_path)),
+            publication=publication,
+            file=File(open(repomd_path, 'rb'))
+        )

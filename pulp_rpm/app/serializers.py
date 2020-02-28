@@ -302,7 +302,7 @@ class RpmRepositorySerializer(RepositorySerializer):
     Serializer for Rpm Repositories.
     """
 
-    metadata_signing_service = RelatedField(
+    metadata_signing_service = serializers.HyperlinkedRelatedField(
         help_text="A reference to an associated signing service.",
         view_name='signing-services-detail',
         queryset=AsciiArmoredDetachedSigningService.objects.all(),
