@@ -346,15 +346,25 @@ def create_repomd_xml(content, publication, extra_repomdrecords, sub_folder=None
         signing_service = AsciiArmoredDetachedSigningService.objects.get(name='sign-metadata')
         sign_results = signing_service.sign(repomd_path)
 
+        # publish a signed file
         PublishedMetadata.create_from_file(
             relative_path=os.path.join(repodata_path, os.path.basename(sign_results['file'])),
             publication=publication,
             file=File(open(sign_results['file'], 'rb'))
         )
+
+        # publish a detached signature
         PublishedMetadata.create_from_file(
             relative_path=os.path.join(repodata_path, os.path.basename(sign_results['signature'])),
             publication=publication,
             file=File(open(sign_results['signature'], 'rb'))
+        )
+
+        # publish a public key required for further verification
+        PublishedMetadata.create_from_file(
+            relative_path=os.path.join(repodata_path, os.path.basename(sign_results['key'])),
+            publication=publication,
+            file=File(open(sign_results['key'], 'rb'))
         )
     else:
         PublishedMetadata.create_from_file(
