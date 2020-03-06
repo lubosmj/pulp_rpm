@@ -311,7 +311,9 @@ class PublishSignedRepomdTestCase(unittest.TestCase):
         ))
         self.addCleanup(self.api_client.delete, repo['pulp_href'])
 
-        remote = self.api_client.post(RPM_REMOTE_PATH, gen_rpm_remote(url=RPM_ALT_LAYOUT_FIXTURE_URL))
+        remote = self.api_client.post(
+            RPM_REMOTE_PATH, gen_rpm_remote(url=RPM_ALT_LAYOUT_FIXTURE_URL)
+        )
         self.addCleanup(self.api_client.delete, remote['pulp_href'])
 
         sync(self.cfg, remote, repo)
@@ -337,7 +339,9 @@ class PublishSignedRepomdTestCase(unittest.TestCase):
 
         This configuration is going to be used by a package manager (dnf) afterwards.
         """
-        self.cli_client.run(('sudo', 'dnf', 'config-manager', '--add-repo', distribution['base_url']))
+        self.cli_client.run(
+            ('sudo', 'dnf', 'config-manager', '--add-repo', distribution['base_url'])
+        )
         repo_id = '*{}'.format(distribution['base_path'])
         public_key_url = f"{distribution['base_url']}/repodata/public.key"
         self.cli_client.run(
@@ -345,7 +349,9 @@ class PublishSignedRepomdTestCase(unittest.TestCase):
              f'--setopt={repo_id}.repo_gpgcheck=1', f'--setopt={repo_id}.gpgkey={public_key_url}',
              repo_id)
         )
-        self.addCleanup(self.cli_client.run, ('sudo', 'dnf', 'config-manager', '--disable', repo_id))
+        self.addCleanup(
+            self.cli_client.run, ('sudo', 'dnf', 'config-manager', '--disable', repo_id)
+        )
 
     def install_package(self):
         """Install and verify the installed package."""
