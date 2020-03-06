@@ -7,7 +7,6 @@ import createrepo_c as cr
 import libcomps
 
 from django.core.files import File
-from django.conf import settings
 
 from pulpcore.plugin.models import (
     AsciiArmoredDetachedSigningService,
@@ -165,12 +164,15 @@ class PublicationData:
         self.publish_artifacts(all_content)
 
 
-def publish(repository_version_pk):
+def publish(repository_version_pk, metadata_signing_service):
     """
     Create a Publication based on a RepositoryVersion.
 
     Args:
         repository_version_pk (str): Create a publication from this repository version.
+        metadata_signing_service (pulpcore.app.models.AsciiArmoredDetachedSigningService):
+            A reference to an associated signing service.
+
     """
     repository_version = RepositoryVersion.objects.get(pk=repository_version_pk)
 
@@ -187,16 +189,23 @@ def publish(repository_version_pk):
             content = publication.repository_version.content
 
             # Main repo
-            create_repomd_xml(content, publication, publication_data.repomdrecords)
+            create_repomd_xml(
+                content, publication, publication_data.repomdrecords,
+                metadata_signing_service=metadata_signing_service
+            )
 
             for sub_repo in publication_data.sub_repos:
                 name = sub_repo[0]
                 content = getattr(publication_data, f"{name}_content")
                 extra_repomdrecords = getattr(publication_data, f"{name}_repomdrecords")
-                create_repomd_xml(content, publication, extra_repomdrecords, name)
+                create_repomd_xml(
+                    content, publication, extra_repomdrecords, name,
+                    metadata_signing_service=metadata_signing_service
+                )
 
 
-def create_repomd_xml(content, publication, extra_repomdrecords, sub_folder=None):
+def create_repomd_xml(content, publication, extra_repomdrecords,
+                      sub_folder=None, metadata_signing_service=None):
     """
     Creates a repomd.xml file.
 
@@ -205,6 +214,8 @@ def create_repomd_xml(content, publication, extra_repomdrecords, sub_folder=None
         publication(pulpcore.plugin.models.Publication): the publication
         extra_repomdrecords(list): list with data relative to repo metadata files
         sub_folder(str): name of the folder for sub repos
+        metadata_signing_service (pulpcore.app.models.AsciiArmoredDetachedSigningService):
+            A reference to an associated signing service.
 
     """
     cwd = os.getcwd()
@@ -342,8 +353,10 @@ def create_repomd_xml(content, publication, extra_repomdrecords, sub_folder=None
     with open(repomd_path, "w") as repomd_f:
         repomd_f.write(repomd.xml_dump())
 
-    if settings.REPO_GPGCHECK:
-        signing_service = AsciiArmoredDetachedSigningService.objects.get(name='sign-metadata')
+    if metadata_signing_service:
+        signing_service = AsciiArmoredDetachedSigningService.objects.get(
+            pk=metadata_signing_service.pk
+        )
         sign_results = signing_service.sign(repomd_path)
 
         # publish a signed file

@@ -212,7 +212,8 @@ class RpmPublicationViewSet(PublicationViewSet):
             tasks.publish,
             [repository_version.repository],
             kwargs={
-                'repository_version_pk': repository_version.pk
+                'repository_version_pk': repository_version.pk,
+                'metadata_signing_service': repository_version.repository.metadata_signing_service
             }
         )
         return OperationPostponedResponse(result, request)
